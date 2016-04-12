@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
 
-    <title>TalkTitle</title>
+    <title>Elm => Javascript</title>
 
     <meta name="description" content="">
     <meta name="author" content="Juan Caicedo">
@@ -41,7 +41,7 @@
       <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
         <section>
-          <h1>TalkTitle</h1>
+          <h1>Elm => Javascript</h1>
         </section>
 
         <section>
@@ -69,6 +69,320 @@
               <br/>
             </div>
           </div>
+        </section>
+
+        <section>
+          <img src="images/colombia.png" style="width:500px"></img>
+        </section>
+
+        <section>
+          <h3>What are we going to talk about?</h3>
+          <ul>
+            <li class="fragment">main-loop</li>
+            <li class="fragment">hyperscript-helpers</li>
+            <li class="fragment">Elm architecture</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>What are we going to build</h3>
+        </section>
+
+        <section>
+          <section>
+            <h3>main-loop</h3>
+            <h4>Wire up the virtual dom</h4>
+          </section>
+          <section>
+            <pre>
+              <code class="javascript" data-trim>
+var mainLoop = require('main-loop');
+var vdom = require('virtual-dom');
+
+var render = function(state) {
+  // Code for rendering a view
+};
+
+var initialState = {
+  title: 'test'
+};
+
+var loop = mainLoop(initialState, render, vdom);
+
+document.querySelector('#content').appendChild(loop.target);
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Then call update</h3>
+            <pre class="fragment">
+              <code class="javascript" data-trim>
+loop.update({
+  title: 'new title'
+});
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>hyperscript-helpers</h3>
+            <h4>Write html like Elm</h4>
+          </section>
+          <section>
+            <h3>In Elm</h3>
+            <pre>
+              <code class="javascript" data-trim>
+render state =
+  h1 [] [ text state.title ]
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>In Javascript</h3>
+            <pre>
+              <code class="javascript" data-trim>
+var render = function(state){
+  h1('.title', state.title);
+};
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Rendering arbitrary lists</h3>
+          </section>
+          <section>
+            <h3>Initial state</h3>
+            <pre class="fragment">
+              <code class="javascript" data-trim>
+/* Initial state */
+var initialState =  {
+  selectedLegislators: [{
+    firstName: 'Juan',
+    lastName: 'Caicedo'
+  }, {
+    firstName: 'Foo',
+    lastName: 'Bar'
+  }],
+  availableLegislators: [{
+    firstName: 'Senator',
+    lastName: 'One'
+  }, {
+    firstName: 'Congresswoman',
+    lastName: 'Two'
+  }]
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Main render function</h3>
+            <pre class="fragment">
+              <code class="javascript" data-trim>
+var render = function (state) {
+  return div('.container', [
+    legislatorTableView('Your Team', state.selectedLegislators),
+    legislatorTableView('Available', state.availableLegislators)
+  ]);
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Single table</h3>
+            <pre class="fragment">
+              <code class="javascript" data-trim>
+var legislatorTableView = function (title, legislators) {
+  return div('.col-xs-6', [
+    h1(title),
+    table('.table.table-striped', [
+      tbody(
+        R.map(legislatorView, legislators)
+      )
+    ])
+  ]);
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Single row</h3>
+            <pre>
+              <code class="javascript" data-trim>
+var legislatorView = function (legislator) {
+  return tr('.container-fluid', [
+    td('.col-xs-6', legislator.firstName),
+    td('.col-xs-6', legislator.lastName)
+  ]);
+});
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Dealing with updates</h3>
+          </section>
+          <section>
+            <h3>Create Actions</h3>
+            <pre class="fragment">
+              <code class="javascript" data-trim>
+var action = function(type, data) {
+  return {
+    type: type,
+    data: data
+  };
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Instantiate EventEmmiter</h3>
+            <pre class="fragment">
+              <code class="javascript" data-trim>
+var emitter = new EventEmitter();
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Set up an address</h3>
+            <pre class="fragment">
+              <code class="javascript" data-trim>
+function address(action) {
+  emitter.emit('update', action);
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Listen to update events</h3>
+            <pre>
+              <code class="javascript" data-trim>
+emitter.on('update', function(action) {
+  var newState = update(loop.state, action);
+  loop.update(newState);
+});
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Calculate a new state</h3>
+            <pre>
+              <code class="javascript" data-trim>
+var update = function (state, action) {
+  var newSelected;
+  var newAvailable;
+
+  // fallback case
+  var newState = state;
+
+  if (action.type === 'Drop') {
+    // move from Selected to Available
+  } else if (action.type === 'Select') {
+    // move from Available to Selected
+  }
+  return newState;
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>How do you do that?</h3>
+            <pre>
+              <code class="javascript" data-trim>
+newSelected = R.append(action.data, state.selectedLegislators);
+newAvailable = R.reject(R.equals(action.data), state.availableLegislators);
+
+newState = R.merge(state, {
+  selectedLegislators: newSelected,
+  availableLegislators: newAvailable
+});
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Merge mirrors Elm</h3>
+            <pre>
+              <code class="elm" data-trim>
+newState =
+  { state
+    | availableLegislators = newAvailable
+    , selectedLegislators = newSelected
+  }
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Pass address to render</h3>
+            <pre>
+              <code class="javascript" data-trim>
+var render = R.curry(function (address, state) {
+  return div('.container', [
+    legislatorSelectView(address, 'Drop', 'Your Team', state.selectedLegislators),
+    legislatorSelectView(address, 'Select', 'Available', state.availableLegislators)
+  ]);
+});
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Update how we instantiate loop</h3>
+            <pre>
+              <code class="javascript" data-trim>
+var loop = mainLoop(initialState, render(address), vdom);
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Pass address and type to table</h3>
+            <pre>
+              <code class="javascript" data-trim>
+var legislatorTableView = function (address, type, title, legislators) {
+  return div('.col-xs-6', [
+    h1(title),
+    table('.table.table-striped', [
+      tbody(
+        R.map(legislatorView(address, type), legislators)
+      )
+    ])
+  ]);
+};
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Pass address and type to legislatorView</h3>
+            <pre>
+              <code class="javascript" data-trim>
+var legislatorView = R.curry(function (address, type, legislator) {
+  return tr('.container-fluid', {
+    onclick: function(ev) {
+      address(action('Toggle', action(type, legislator)));
+    }
+  }, [
+    td('.col-xs-6', legislator.firstName),
+    td('.col-xs-6', legislator.lastName)
+  ]);
+});
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <h3>More resources</h3>
+          <ul>
+            <li>Demo: <a href="http://www.juancaicedo.com/elm-to-js/">juancaicedo.com/elm-to-js</a></li>
+            <li>Blog post: <a href="http://www.fluencia.engineering.com/elm-to-js/">fluencia.engineering.com/elm-to-js</a></li>
+            <li>Elm in javascript: <a href="https://github.com/kaleidos/olmo">github.com/kaleidos/olmo</a></li>
+            <li>Olmo: <a href="https://github.com/kaleidos/olmo">github.com/kaleidos/olmo</a></li>
+            <li>Redux: <a href="http://redux.js.org/">redux.js.org</a></li>
+          </ul>
         </section>
 
         <div class="footer">
