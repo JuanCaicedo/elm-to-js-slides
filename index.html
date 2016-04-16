@@ -72,20 +72,33 @@
         </section>
 
         <section>
-          <img src="images/colombia.png" style="width:500px"></img>
-        </section>
-
-        <section>
           <h3>What are we going to talk about?</h3>
           <ul>
+            <li class="fragment">Good things about Elm</li>
             <li class="fragment">main-loop</li>
             <li class="fragment">hyperscript-helpers</li>
-            <li class="fragment">Elm architecture</li>
+            <li class="fragment">Rendering arbitrary lists</li>
+            <li class="fragment">Updating functionally</li>
           </ul>
         </section>
 
         <section>
-          <h3>What are we going to build</h3>
+          <section>
+            <h3>What is Elm?</h3>
+            <ul>
+              <li class="fragment">Compile to js</li>
+              <li class="fragment">Fully functional</li>
+              <li class="fragment">Flux architecture</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Why is that good?</h3>
+            <ul>
+              <li class="fragment">Testable</li>
+              <li class="fragment">Refactorable</li>
+              <li class="fragment">Easy to find errors</li>
+            </ul>
+          </section>
         </section>
 
         <section>
@@ -143,6 +156,9 @@ render state =
             <h3>In Javascript</h3>
             <pre>
               <code class="javascript" data-trim>
+var hh = require('hyperscript-helpers');
+var h1 = hh.h1;
+
 var render = function(state){
   h1('.title', state.title);
 };
@@ -242,7 +258,7 @@ var action = function(type, data) {
             </pre>
           </section>
           <section>
-            <h3>Instantiate EventEmmiter</h3>
+            <h3>Instantiate Event Emmiter</h3>
             <pre class="fragment">
               <code class="javascript" data-trim>
 var emitter = new EventEmitter();
@@ -306,25 +322,13 @@ newState = R.merge(state, {
             </pre>
           </section>
           <section>
-            <h3>Merge mirrors Elm</h3>
-            <pre>
-              <code class="elm" data-trim>
-newState =
-  { state
-    | availableLegislators = newAvailable
-    , selectedLegislators = newSelected
-  }
-              </code>
-            </pre>
-          </section>
-          <section>
             <h3>Pass address to render</h3>
             <pre>
               <code class="javascript" data-trim>
 var render = R.curry(function (address, state) {
   return div('.container', [
-    legislatorSelectView(address, 'Drop', 'Your Team', state.selectedLegislators),
-    legislatorSelectView(address, 'Select', 'Available', state.availableLegislators)
+    legislatorTableView(address, 'Drop', 'Your Team', state.selectedLegislators),
+    legislatorTableView(address, 'Select', 'Available', state.availableLegislators)
   ]);
 });
               </code>
@@ -362,7 +366,7 @@ var legislatorTableView = function (address, type, title, legislators) {
 var legislatorView = R.curry(function (address, type, legislator) {
   return tr('.container-fluid', {
     onclick: function(ev) {
-      address(action('Toggle', action(type, legislator)));
+      address(action(type, legislator));
     }
   }, [
     td('.col-xs-6', legislator.firstName),
@@ -399,6 +403,7 @@ var legislatorView = R.curry(function (address, type, legislator) {
       // Full list of configuration options available at:
       // https://github.com/hakimel/reveal.js#configuration
       Reveal.initialize({
+        margin: 0,
         controls: true,
         progress: true,
         history: true,
